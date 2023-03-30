@@ -3,7 +3,6 @@ import requests
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.editor import AudioFileClip
 from moviepy.audio.io.AudioFileClip import AudioFileClip
-
 import openai
 import os
 import time
@@ -27,7 +26,6 @@ endpoint = "https://api.openai.com/v1/audio/transcriptions"
 # endpoint = "https://api.openai.com/v1/whisper"
 file_pieces = []
 
-@st.cache
 def segment_file(output_file, directory):
     # Load the audio clip
     audio_clip = AudioFileClip(output_file)

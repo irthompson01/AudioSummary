@@ -2,7 +2,6 @@ streamlit
 requests
 moviepy
 openai
-os
 time
 datetime
 sys
