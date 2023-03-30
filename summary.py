@@ -13,8 +13,8 @@ import pandas as pd
 import numpy as np
 import json
 
-openai.organization = "org-s0nwmFpPMZ1GTwO7vxMm0B3T"
-openai.api_key = "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"
+openai.organization = st.secrets["ORG_ID"]
+openai.api_key = st.secrets["API_KEY"]
 openai.Model.list()
 
 st.title('Meeting Summary App POC')
