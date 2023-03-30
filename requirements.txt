@@ -3,7 +3,6 @@ requests
 moviepy
 openai
 datetime
-sys
 math
 pandas
 numpy
