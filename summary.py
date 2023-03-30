@@ -21,9 +21,7 @@ st.title('Meeting Summary App POC')
 
  # Get the current date
 now = datetime.datetime.now()
-encoding = "mp4"
-endpoint = "https://api.openai.com/v1/audio/transcriptions"
-# endpoint = "https://api.openai.com/v1/whisper"
+max_size = 20
 file_pieces = []
 
 def segment_file(output_file, directory):
@@ -36,7 +34,7 @@ def segment_file(output_file, directory):
     # Get clip duration
     audio_length = audio_clip.duration
     # Calculate num of chunks clip needs to be split into
-    num_chunks = math.ceil(size_in_mb / 25)
+    num_chunks = math.ceil(size_in_mb / max_size)
     segment_duration = audio_length // num_chunks
     file_pieces = []
 
@@ -81,49 +79,11 @@ def segment_file(output_file, directory):
 # uploaded_file = st.file_uploader("Choose a video or audio file")
 uploaded_file = st.sidebar.file_uploader("Upload a recording of your meeting", type=["mp3", "mp4", "wav", "flac"])
 
-# if uploaded_file is not None:
-#     st.write(uploaded_file.type)
-
-#     if uploaded_file.type == "video/mp4":
-#         bytes_data = uploaded_file.read()  
-#         file_name = uploaded_file.name.replace(".mp4", "")
-#         directory = f"{now.year}/{now.month}/{now.day}/{file_name}"
-#         if not os.path.isdir(directory):
-#                 os.makedirs(directory)
-#         output_file = f"{now.year}/{now.month}/{now.day}/{file_name}/{file_name}.mp4"
-
-#         with open(output_file, 'wb') as out:
-#             out.write(bytes_data)
-
-#         st.write((uploaded_file))
-#         st.write((uploaded_file.name.replace(".mp4", "")))
-
-#         video_clip = VideoFileClip(output_file)
-#         audio_file_name = directory + "/AudioExtract.mp3"
-#         video_clip.audio.write_audiofile(audio_file_name)
-
-#         audio_clip = AudioFileClip(audio_file_name)
-
-#         reader = audio_clip.reader
-#         # Get the audio file size in bytes from the audio reader info
-#         size_in_bytes = reader.nbytes
-
-#         # Convert the size to megabytes
-#         size_in_mb = size_in_bytes / (1024 * 1024)
-#         # size_in_bytes = audio_clip.filesize
-#         # size_in_mb = size_in_bytes / (1024 * 1024)
-
-#         if size_in_mb > 25:
-#             st.write("Audio File is larger than 25MB, segmenting file for summary...")
-#             file_pieces = segment_file(audio_file_name, directory)
-#         else:
-#             file_pieces.append(audio_file_name)
-
 
 if st.sidebar.button('Summarize Video'):
 
     if uploaded_file is not None:
-        # st.write(uploaded_file.type)
+        st.write(uploaded_file.type)
 
         if uploaded_file.type == "video/mp4":
             bytes_data = uploaded_file.read()  
@@ -154,14 +114,41 @@ if st.sidebar.button('Summarize Video'):
            
             st.sidebar.write(round(size_in_mb, 1), "MB")
 
-            if size_in_mb > 25:
-                st.sidebar.write("Audio File is larger than 25MB, segmenting file for summary...")
+            if size_in_mb > max_size:
+                st.sidebar.write("Audio File is larger than ", str(max_size), "MB, segmenting file for summary...")
                 file_pieces = segment_file(audio_file_name, directory)
             else:
                 file_pieces.append(audio_file_name)
+        
+        elif uploaded_file.type == "audio/mpeg":
             
-        # Write the number of files created
-        # st.write(len(file_pieces))
+            bytes_data = uploaded_file.read()  
+            file_name = uploaded_file.name.replace(".mp3", "").replace(" ", "")
+            directory = f"{now.year}/{now.month}/{now.day}/{file_name}"
+            if not os.path.isdir(directory):
+                    os.makedirs(directory)
+            audio_file_name = directory + "/AudioExtract.mp3"
+
+            with open(audio_file_name, 'wb') as out:
+                out.write(bytes_data)
+
+            st.sidebar.write((uploaded_file)) 
+            audio_clip = AudioFileClip(audio_file_name)
+
+            reader = audio_clip.reader
+            # Get the size of an MP3 file in bytes
+            size_in_bytes = os.path.getsize(audio_file_name)
+
+            # Convert the size to megabytes
+            size_in_mb = size_in_bytes / (1024 * 1024)
+           
+            st.sidebar.write(round(size_in_mb, 1), "MB")
+
+            if size_in_mb > max_size:
+                st.sidebar.write("Audio File is larger than ", str(max_size), "MB, segmenting file for summary...")
+                file_pieces = segment_file(audio_file_name, directory)
+            else:
+                file_pieces.append(audio_file_name)  
 
         # Write the file names
         st.sidebar.write(file_pieces)
