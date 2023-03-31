@@ -99,9 +99,14 @@ if st.sidebar.button('Summarize Video'):
             st.sidebar.write((uploaded_file))
             # st.write((uploaded_file.name.replace(".mp4", "")))
 
-            video_clip = VideoFileClip(output_file)
-            audio_file_name = directory + "/AudioExtract.mp3"
-            video_clip.audio.write_audiofile(audio_file_name)
+            try:
+                video_clip = VideoFileClip(output_file)
+                audio_file_name = directory + "/AudioExtract.mp3"
+                video_clip.audio.write_audiofile(audio_file_name)
+            except KeyError:
+                video_clip = AudioFileClip(output_file)
+                audio_file_name = directory + "/AudioExtract.mp3"
+                video_clip.write_audiofile(audio_file_name)
 
             audio_clip = AudioFileClip(audio_file_name)
 
